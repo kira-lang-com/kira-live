@@ -1,3 +1,3 @@
 # 26.10.4
 
-Initial source release: A Kira Live shell that runs applications pushed to a device during development.
+The first source release of Kira Live provides a development shell that starts a live runtime device and runs applications pushed to it with `kira push`. Its window shows device status, the push command, and an event log.
