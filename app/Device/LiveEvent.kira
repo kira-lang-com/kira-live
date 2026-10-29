@@ -1,0 +1,51 @@
+import Foundation
+
+// What the device did, as the runtime codes it. Open, so a code a newer
+// runtime adds reaches the shell as itself rather than trapping.
+@Open
+enum LiveEventCode: I32 {
+    Nothing = 0
+    Listening = 1
+    Installed = 2
+    Ran = 3
+    Refused = 4
+    Dropped = 5
+}
+
+// One thing the device did, with the runtime's words for it.
+enum LiveEvent {
+    // The device listens at this address.
+    Listening(String)
+    // A push of this module landed.
+    Installed(String)
+    // The app ran after landing, and ended this way.
+    Ran(String)
+    // A push was refused: the module and why.
+    Refused(String)
+    // A client's connection broke, for this reason.
+    Dropped(String)
+}
+
+extend LiveEvent {
+    // What a person reads for this event in the log.
+    function summary(borrow self) -> String {
+        match self {
+            Listening(address) -> return "Listening on \(address)"
+            Installed(module) -> return "Installed \(module)"
+            Ran(outcome) -> return "main \(outcome)"
+            Refused(reason) -> return "Refused \(reason)"
+            Dropped(reason) -> return "Client dropped: \(reason)"
+        }
+    }
+
+    // Whether the event is a failure a person should notice.
+    function isFailure(borrow self) -> Bool {
+        match self {
+            Refused -> return true
+            Dropped -> return true
+            Listening -> return false
+            Installed -> return false
+            Ran -> return false
+        }
+    }
+}

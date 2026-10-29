@@ -1,0 +1,9 @@
+// Kira Live: a shell anyone pushes an app to while they write it. The shell
+// runs a device that takes `kira push <address>` from any machine that reaches
+// it, a tailnet one included, and runs each version as it lands.
+construct KiraLive extends Package {
+    let version: String = "0.1.0"
+    let kind: PackageKind = .App
+    let defaults: Defaults = Defaults { executionMode: Backend.Llvm, buildTarget: BuildTarget.Host }
+    let dependencies: [Dependency] = [Dependency { name: "KiraUI", path: "../kira-ui" }]
+}

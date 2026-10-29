@@ -1,0 +1,16 @@
+import KiraUI
+
+// The command a person runs in their package to push it here.
+construct PushCommand(command: String) extends Widget {
+    body {
+        HStack(spacing = .Small) {
+            Text("$")
+                .typography(.callout)
+                .foregroundColor(.Success)
+            Text(command)
+                .typography(.callout)
+                .foregroundColor(.Primary)
+            Spacer()
+        }
+    }
+}

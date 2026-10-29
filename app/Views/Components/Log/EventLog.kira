@@ -1,0 +1,23 @@
+import KiraUI
+
+// Everything the device did, oldest first.
+construct EventLog(events: [LiveEvent]) extends Widget {
+    body {
+        GroupBox {
+            if events.count == 0 {
+                Text("Nothing has happened yet.")
+                    .typography(.callout)
+                    .foregroundColor(.Secondary)
+            }
+            ScrollView {
+                VStack(spacing = .ExtraSmall) {
+                    For(event in events) {
+                        EventRow(event = event)
+                    }
+                }
+            }
+        } label: {
+            Label(title = "Activity", systemImage = .Bolt)
+        }
+    }
+}

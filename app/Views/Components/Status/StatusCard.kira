@@ -1,0 +1,21 @@
+import KiraUI
+
+// The app the device runs, how it last ended, and how to push to it.
+construct StatusCard(status: LiveStatus) extends Widget {
+    body {
+        GroupBox {
+            VStack(spacing = .Small) {
+                Text(status.headline)
+                    .typography(.title)
+                Text(status.detail)
+                    .typography(.callout)
+                    .foregroundColor(.Secondary)
+                if status.pushCommand != "" {
+                    PushCommand(command = status.pushCommand)
+                }
+            }
+        } label: {
+            Label(title = "Device", systemImage = .AntennaRadiowavesLeftRight)
+        }
+    }
+}

@@ -1,0 +1,57 @@
+import KiraUI
+import Foundation
+
+@Main
+function main() {
+    LiveApp()
+}
+
+function LiveApp() {
+    let device = nativeState(LiveShell { device: startLiveDevice(liveListenAddress) })
+    let shell = nativeUserData(device)
+    RunKiraWindowApp(
+        title: "Kira Live",
+        width: 960,
+        height: 680,
+        rootBuilder: { in
+            let state = nativeRecover<LiveShell>(shell)
+            return LiveWindow(
+                status = liveStatus(state.device, liveListenAddress),
+                events = deviceEvents(state.device)
+            )
+        },
+        engineFrame: { frame in
+            var state = nativeRecover<LiveShell>(shell)
+            match state.device {
+                Some(running) -> {
+                    var updated = running
+                    updated.collectEvents()
+                    state.device = .Some(updated)
+                }
+                // The device never started; there is nothing to collect.
+                None -> {}
+            }
+        },
+        // The device lands apps on its own schedule, not the person's.
+        rebuildsEveryFrame: true
+    )
+    let state = nativeRecover<LiveShell>(shell)
+    match state.device {
+        Some(running) -> running.stop()
+        // Nothing started, so nothing stops.
+        None -> {}
+    }
+}
+
+// What the window shows: the shell's device, when it could start one.
+struct LiveShell {
+    var device: LiveDevice?
+}
+
+// What the device did, or nothing when it never started.
+function deviceEvents(device: borrow LiveDevice?) -> [LiveEvent] {
+    match device {
+        Some(running) -> return running.events
+        None -> return []
+    }
+}

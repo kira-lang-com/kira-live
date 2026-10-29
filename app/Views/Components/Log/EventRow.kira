@@ -1,0 +1,13 @@
+import KiraUI
+
+// One thing the device did, in red when it went wrong.
+construct EventRow(event: LiveEvent) extends Widget {
+    body {
+        HStack(spacing = .Small) {
+            Text(event.summary())
+                .typography(.callout)
+                .foregroundColor(event.isFailure() ? .Danger : .Primary)
+            Spacer()
+        }
+    }
+}

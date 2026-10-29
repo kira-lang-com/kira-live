@@ -1,0 +1,21 @@
+import Foundation
+
+// The live runtime device's entry points in the VM runtime (KLF D-378),
+// reached through `kira_runtime`, the runtime library Ember declares. A
+// device is named by a handle, 0 when it could not start; a string it returns
+// stays valid until the next call for that device.
+
+@FFI.Extern { library: kira_runtime, symbol: klfvm_live_start, abi: c }
+function klfvm_live_start(address: CString, bundle: CString, sysroot: CString) -> Int
+
+@FFI.Extern { library: kira_runtime, symbol: klfvm_live_address, abi: c }
+function klfvm_live_address(handle: Int) -> CString
+
+@FFI.Extern { library: kira_runtime, symbol: klfvm_live_next_event, abi: c }
+function klfvm_live_next_event(handle: Int) -> I32
+
+@FFI.Extern { library: kira_runtime, symbol: klfvm_live_event_detail, abi: c }
+function klfvm_live_event_detail(handle: Int) -> CString
+
+@FFI.Extern { library: kira_runtime, symbol: klfvm_live_stop, abi: c }
+function klfvm_live_stop(handle: Int)

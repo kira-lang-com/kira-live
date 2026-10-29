@@ -1,0 +1,66 @@
+import Foundation
+
+// A device handle from the runtime.
+distinct LiveDeviceHandle = Int
+
+// The address the shell listens on: every interface, so a push reaches it at
+// any address the machine has, a tailnet one included.
+let liveListenAddress = "0.0.0.0:47100"
+
+// The bundle id the device's hello reports.
+let liveBundleId = "dev.kira.live"
+
+// The shell's device: where it listens, the app it runs, and what it did,
+// oldest first.
+struct LiveDevice {
+    let handle: LiveDeviceHandle
+    let address: String
+    var app: String? = .None
+    var lastRun: String? = .None
+    var events: [LiveEvent] = []
+}
+
+// Starts a device listening on `address`, or nothing when it cannot listen
+// there (the port is taken, or the address is not this machine's).
+function startLiveDevice(address: String) -> LiveDevice? {
+    let raw = klfvm_live_start(address, liveBundleId, "")
+    if raw == 0 {
+        return .None
+    }
+    let handle = LiveDeviceHandle(raw)
+    return .Some(LiveDevice { handle: handle, address: stringFromCString(klfvm_live_address(raw)) })
+}
+
+extend LiveDevice {
+    // Takes in everything the device did since the last call. The device runs
+    // on its own thread and nothing lets it wake the window's loop, so the
+    // shell asks once a frame; asking when nothing happened takes one lock.
+    function collectEvents(borrow mut self) {
+        while true {
+            let code = fromCode<LiveEventCode>(klfvm_live_next_event(self.handle.raw))
+            let detail = stringFromCString(klfvm_live_event_detail(self.handle.raw))
+            match code {
+                Nothing -> return
+                Listening -> self.events.append(.Listening(detail))
+                Installed -> {
+                    self.app = .Some(detail)
+                    self.events.append(.Installed(detail))
+                }
+                Ran -> {
+                    self.lastRun = .Some(detail)
+                    self.events.append(.Ran(detail))
+                }
+                Refused -> self.events.append(.Refused(detail))
+                Dropped -> self.events.append(.Dropped(detail))
+                // A code from a newer runtime: this shell has nothing to show
+                // for it.
+                else -> {}
+            }
+        }
+    }
+
+    // Stops the device; it takes no new client.
+    function stop(borrow self) {
+        klfvm_live_stop(self.handle.raw)
+    }
+}

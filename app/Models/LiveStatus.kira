@@ -1,0 +1,49 @@
+import Foundation
+
+// What the window says about its device: a headline, the line under it, and
+// the command that pushes to it.
+struct LiveStatus {
+    let headline: String
+    let detail: String
+    let pushCommand: String
+}
+
+// The status of `device`, or of a shell that could not listen on `address`.
+function liveStatus(device: borrow LiveDevice?, address: String) -> LiveStatus {
+    match device {
+        Some(running) -> return runningStatus(running)
+        None -> return LiveStatus {
+            headline: "Not listening",
+            detail: "Another program may hold \(address). Close it and open Kira Live again.",
+            pushCommand: ""
+        }
+    }
+}
+
+function runningStatus(device: borrow LiveDevice) -> LiveStatus {
+    // The device listens on every interface, so a client names this machine
+    // by whichever of its addresses it reaches, and only the port is the
+    // device's own.
+    let parts = device.address.split(":")
+    let port = parts[parts.count - 1]
+    let pushCommand = "kira push <this machine's address>:\(port)"
+    match device.app {
+        Some(app) -> return LiveStatus {
+            headline: app,
+            detail: lastRunDetail(device.lastRun),
+            pushCommand: pushCommand
+        }
+        None -> return LiveStatus {
+            headline: "Waiting for an app",
+            detail: "Push a package from any machine that reaches this one, over a tailnet too.",
+            pushCommand: pushCommand
+        }
+    }
+}
+
+function lastRunDetail(lastRun: borrow String?) -> String {
+    match lastRun {
+        Some(outcome) -> return "main \(outcome)"
+        None -> return "Installed; main has not run yet."
+    }
+}

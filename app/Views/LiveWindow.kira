@@ -1,0 +1,16 @@
+import KiraUI
+
+// The shell's one window: where to push, the app the device runs, and what
+// the device did.
+construct LiveWindow(status: LiveStatus, events: [LiveEvent]) extends Widget {
+    body {
+        AppSurface {
+            VStack(spacing = .Large) {
+                StatusCard(status = status)
+                EventLog(events = events)
+                Spacer()
+            }
+            .padding(scaledMetric(24.0))
+        }
+    }
+}
