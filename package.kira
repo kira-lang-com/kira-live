@@ -2,7 +2,7 @@
 // runs a device that takes `kira push <address>` from any machine that reaches
 // it, a tailnet one included, and runs each version as it lands.
 construct KiraLive extends Package {
-    let version: String = "0.1.0"
+    let version: String = "26.10.4"
     let kind: PackageKind = .App
     let defaults: Defaults = Defaults { executionMode: Backend.Llvm, buildTarget: BuildTarget.Host }
     let dependencies: [Dependency] = [Dependency { name: "KiraUI", path: "../kira-ui" }]
